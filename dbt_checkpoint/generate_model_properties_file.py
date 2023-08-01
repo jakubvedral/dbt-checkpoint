@@ -20,7 +20,7 @@ from dbt_checkpoint.utils import (
 
 
 def append_to_properties_file(path: Path, model_schema: Dict[str, Any]) -> None:
-    file = safe_load(path.open())
+    file = safe_load(path.open(encoding="utf-8"))
     if file.get("models"):
         model = file.get("models")
     else:
@@ -28,7 +28,7 @@ def append_to_properties_file(path: Path, model_schema: Dict[str, Any]) -> None:
         file["models"] = model
     model.append(model_schema)
     model_name = model_schema.get("name")  # pragma: no mutate
-    with open(path, "w") as f:
+    with open(path, "w",encoding="utf-8") as f:
         dump(file, f, default_flow_style=False, sort_keys=False, allow_unicode=True)
         print(
             f"{path}: the schema of the `{model_name}` model was appended to the file."
@@ -39,7 +39,7 @@ def write_to_properties_file(path: Path, model_schema: Dict[str, Any]) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     file = {"version": 2, "models": [model_schema]}
     model_name = model_schema.get("name")  # pragma: no mutate
-    with open(path, "w") as f:
+    with open(path, "w",encoding="utf-8") as f:
         dump(file, f, default_flow_style=False, sort_keys=False, allow_unicode=True)
         print(
             f"{path}: the schema of the `{model_name}` model was written to the file."

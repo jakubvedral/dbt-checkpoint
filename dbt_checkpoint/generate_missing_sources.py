@@ -23,7 +23,7 @@ def create_missing_sources(
             path = Path(output_path)
             # is file and exists
             if path.is_file():
-                schema = safe_load(path.open())
+                schema = safe_load(path.open(encoding="utf-8"))
                 schema_sources = schema.get("sources", [])
                 seen = False  # pragma: no mutate
                 for schema_source in schema_sources:
@@ -37,7 +37,7 @@ def create_missing_sources(
                         f"exists in `{output_path}`. Please create it "
                         f"before adding tables."
                     )
-                with open(path, "w") as f:
+                with open(path, "w", encoding="utf-8") as f:
                     print(f"Generating missing source `{source_name}.{table_name}`.")
                     dump(schema, f, default_flow_style=False, sort_keys=False, allow_unicode=True)
             else:

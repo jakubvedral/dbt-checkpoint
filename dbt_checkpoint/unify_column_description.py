@@ -18,7 +18,7 @@ def _replace_desc(path: Path, column_name: str, description: str) -> None:
         for column in model.get("columns", []):
             if column_name == column.get("name"):
                 column["description"] = description
-    with open(path, "w") as f:
+    with open(path, "w",encoding="utf-8") as f:
         yaml.dump(file, f, default_flow_style=False, sort_keys=False, allow_unicode=True)
         print(
             f"{path}: replaced description of "
