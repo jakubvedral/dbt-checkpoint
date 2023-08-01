@@ -13,7 +13,7 @@ from dbt_checkpoint.utils import JsonOpenError, add_default_args, get_dbt_manife
 
 
 def _replace_desc(path: Path, column_name: str, description: str) -> None:
-    file = yaml.safe_load(path.open())
+    file = yaml.safe_load(path.open(encoding="utf-8"))
     for model in file.get("models", []):
         for column in model.get("columns", []):
             if column_name == column.get("name"):

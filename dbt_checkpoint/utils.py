@@ -1,5 +1,6 @@
 import argparse
 import json
+from math import e
 import re
 import subprocess
 from dataclasses import dataclass
@@ -133,7 +134,7 @@ def get_json(json_filename: str) -> Dict[str, Any]:
 def get_config_file(config_file_path: str) -> Dict[str, Any]:
     try:
         path = Path(config_file_path)
-        config = safe_load(path.open())
+        config = safe_load(path.open(encoding="utf-8"))
         check_yml_version(config_file_path, config)
     except FileNotFoundError:
         config = {}
@@ -213,7 +214,7 @@ def get_model_schemas(
     yml_files: Sequence[Path], filenames: Set[str], all_schemas: bool = False
 ) -> Generator[ModelSchema, None, None]:
     for yml_file in yml_files:
-        with open(yml_file, "r") as file:
+        with open(yml_file, "r", encoding="utf-8") as file:
             schema = safe_load(file)
             for model in schema.get("models", []):
                 if isinstance(model, dict) and model.get("name"):
@@ -231,7 +232,7 @@ def get_macro_schemas(
     yml_files: Sequence[Path], filenames: Set[str], all_schemas: bool = False
 ) -> Generator[MacroSchema, None, None]:
     for yml_file in yml_files:
-        schema = safe_load(yml_file.open())
+        schema = safe_load(yml_file.open(encoding="utf-8"))
         for macro in schema.get("macros", []):
             if isinstance(macro, dict) and macro.get("name"):
                 macro_name = macro.get("name", "")  # pragma: no mutate
@@ -248,7 +249,7 @@ def get_source_schemas(
     yml_files: Sequence[Path],
 ) -> Generator[SourceSchema, None, None]:
     for yml_file in yml_files:
-        schema = safe_load(yml_file.open())
+        schema = safe_load(yml_file.open(encoding="utf-8"))
         for source in schema.get("sources", []):
             source_name = source.get("name")
             tables = source.pop("tables", [])

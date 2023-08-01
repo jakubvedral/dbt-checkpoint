@@ -203,7 +203,7 @@ def test_get_missing_file_paths(
     if valid_manifest:
         import json
 
-        manifest = json.load(open(manifest_path_str))
+        manifest = json.load(open(manifest_path_str,encoding="utf-8"))
     with patch("dbt_checkpoint.utils._discover_prop_files") as mock_discover_prop_files:
         with patch(
             "dbt_checkpoint.utils._discover_sql_files"
