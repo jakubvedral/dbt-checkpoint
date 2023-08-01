@@ -29,7 +29,7 @@ def append_to_properties_file(path: Path, model_schema: Dict[str, Any]) -> None:
     model.append(model_schema)
     model_name = model_schema.get("name")  # pragma: no mutate
     with open(path, "w") as f:
-        dump(file, f, default_flow_style=False, sort_keys=False)
+        dump(file, f, default_flow_style=False, sort_keys=False, allow_unicode=True)
         print(
             f"{path}: the schema of the `{model_name}` model was appended to the file."
         )
@@ -40,7 +40,7 @@ def write_to_properties_file(path: Path, model_schema: Dict[str, Any]) -> None:
     file = {"version": 2, "models": [model_schema]}
     model_name = model_schema.get("name")  # pragma: no mutate
     with open(path, "w") as f:
-        dump(file, f, default_flow_style=False, sort_keys=False)
+        dump(file, f, default_flow_style=False, sort_keys=False, allow_unicode=True)
         print(
             f"{path}: the schema of the `{model_name}` model was written to the file."
         )

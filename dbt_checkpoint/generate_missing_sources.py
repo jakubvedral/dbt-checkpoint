@@ -39,7 +39,7 @@ def create_missing_sources(
                     )
                 with open(path, "w") as f:
                     print(f"Generating missing source `{source_name}.{table_name}`.")
-                    dump(schema, f, default_flow_style=False, sort_keys=False)
+                    dump(schema, f, default_flow_style=False, sort_keys=False, allow_unicode=True)
             else:
                 print(
                     f"Path `{output_path}` does not exists. "

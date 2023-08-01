@@ -424,7 +424,7 @@ CONFIG_WITH_TRACKING_FILE = {"version": 1, "disable-tracking": False, "is-test":
 
 @pytest.fixture(scope="function")
 def config_path_str(tmpdir):
-    yaml_config = yaml.dump(CONFIG_FILE)
+    yaml_config = yaml.dump(CONFIG_FILE, allow_unicode=True)
     file = tmpdir.mkdir("temp").join(".dbt-checkpoint.yaml")
     file.write(yaml_config)
     yield str(file)
@@ -432,7 +432,7 @@ def config_path_str(tmpdir):
 
 @pytest.fixture(scope="function")
 def config_with_tracking_path_str(tmpdir):
-    yaml_config = yaml.dump(CONFIG_WITH_TRACKING_FILE)
+    yaml_config = yaml.dump(CONFIG_WITH_TRACKING_FILE, allow_unicode=True)
     file = tmpdir.mkdir("temp").join(".dbt-checkpoint.yaml")
     file.write(yaml_config)
     yield str(file)
