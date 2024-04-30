@@ -103,7 +103,7 @@ def cmd_output(
     kwargs.setdefault("stderr", subprocess.PIPE)
     proc = subprocess.Popen(cmd, **kwargs)
     stdout, stderr = proc.communicate()
-    stdout = stdout.decode()
+    stdout = stdout.decode('utf8')
     if expected_code is not None and proc.returncode != expected_code:
         raise CalledProcessError(
             cmd,
