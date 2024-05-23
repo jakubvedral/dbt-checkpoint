@@ -19,13 +19,14 @@ def check_child_parent_cnt(
     paths: Sequence[str],
     manifest: Dict[str, Any],
     required_cnt: Sequence[Dict[str, Any]],
+    include_disabled: bool = False,
 ) -> int:
     status_code = 0
-    sqls = get_model_sqls(paths, manifest)
+    sqls = get_model_sqls(paths, manifest, include_disabled)
     filenames = set(sqls.keys())
 
     # get manifest nodes that pre-commit found as changed
-    models = get_models(manifest, filenames)
+    models = get_models(manifest, filenames, include_disabled=include_disabled)
 
     for model in models:
         childs = list(
@@ -55,7 +56,7 @@ def check_child_parent_cnt(
                 status_code = 1
                 print(
                     f"{model.model_name}: "
-                    f"has {real_value} {req_type}, but {req_type} {req_cnt}"
+                    f"has {real_value} {req_dep} {req_type}, but {req_type} {req_cnt} "
                     f"is/are required.",
                 )
 
@@ -76,7 +77,7 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
     parser.add_argument(
         "--max-parent-cnt",
         type=int,
-        help="Miximal number of parent relations.",
+        help="Maximal number of parent relations.",
     )
 
     parser.add_argument(
@@ -89,7 +90,7 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
     parser.add_argument(
         "--max-child-cnt",
         type=int,
-        help="Miximal number of child relations.",
+        help="Maximal number of child relations.",
     )
 
     args = parser.parse_args(argv)
@@ -128,7 +129,10 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
     ]
     start_time = time.time()
     status_code = check_child_parent_cnt(
-        paths=args.filenames, manifest=manifest, required_cnt=required_cnt
+        paths=args.filenames,
+        manifest=manifest,
+        required_cnt=required_cnt,
+        include_disabled=args.include_disabled,
     )
     end_time = time.time()
     script_args = vars(args)
