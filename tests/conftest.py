@@ -8,17 +8,30 @@ from dbt_checkpoint.utils import cmd_output
 MANIFEST = {
     "metadata": {
         "dbt_schema_version": "https://schemas.getdbt.com/dbt/manifest/v6.json",
-        "dbt_version": "1.2.1",
+        "dbt_version": "1.5.0",
         "generated_at": "2022-10-04T16:19:51.780894Z",
         "user_id": "test_user_id",
         "send_anonymous_usage_stats": True,
         "adapter_type": "snowflake",
     },
     "nodes": {
+        "model.with_version.v1": {
+            "patch_path": "project://bb/with_version.yml",
+            "path": "aa/bb/with_version.sql",
+            "root_path": "/path/to/aa",
+            "config": {
+                "materialized": "table",
+            },
+            "version": 1,
+            "latest_version": 1,
+        },
         "model.with_schema": {
             "patch_path": "project://bb/with_schema.yml",
             "path": "aa/bb/with_schema.sql",
             "root_path": "/path/to/aa",
+            "config": {
+                "materialized": "table",
+            },
         },
         "model.without_schema": {
             "patch_path": "",
@@ -64,6 +77,27 @@ MANIFEST = {
         "model.without_meta": {
             "patch_path": "project://bb/without_meta.yml",
             "path": "aa/bb/without_meta.sql",
+            "root_path": "/path/to/aa",
+        },
+        "model.with_labels": {
+            "config": {
+                "labels": {"foo": "test", "bar": "test"},
+            },
+            "patch_path": "project://bb/with_labels.yml",
+            "path": "aa/bb/with_labels.sql",
+            "root_path": "/path/to/aa",
+        },
+        "model.with_labels_foo": {
+            "config": {
+                "labels": {"foo": "test"},
+            },
+            "patch_path": "project://bb/with_labels_foo.yml",
+            "path": "aa/bb/with_labels_foo.sql",
+            "root_path": "/path/to/aa",
+        },
+        "model.without_labels": {
+            "patch_path": "project://bb/without_labels.yml",
+            "path": "aa/bb/without_labels.sql",
             "root_path": "/path/to/aa",
         },
         "model.with_tags": {
@@ -204,6 +238,7 @@ MANIFEST = {
             "patch_path": "project://bb/with_test1.yml",
             "path": "aa/bb/with_test1.sql",
             "root_path": "/path/to/aa",
+            "config": {"materialized": "table"},
         },
         "model.with_test2": {
             "patch_path": "project://bb/with_test2.yml",
@@ -219,6 +254,7 @@ MANIFEST = {
             "patch_path": "project://bb/without_test.yml",
             "path": "aa/bb/without_test.sql",
             "root_path": "/path/to/aa",
+            "config": {"materialized": "incremental"},
         },
         "model.replaced_model": {
             "alias": "replaced_model",
@@ -245,6 +281,70 @@ MANIFEST = {
             "patch_path": "project://bb/parent_child.yml",
             "path": "aa/bb/parent_child.sql",
             "root_path": "/path/to/aa",
+            "config": {
+                "materialized": "view",
+            },
+        },
+        "model.with_contract": {
+            "patch_path": "project://bb/with_contract.yml",
+            "path": "aa/bb/with_contract.sql",
+            "root_path": "/path/to/aa",
+            "config": {"contract": {"enforced": True}, "materialized": "view"},
+        },
+        "model.with_no_contract": {
+            "patch_path": "project://bb/with_no_contract.yml",
+            "path": "aa/bb/with_no_contract.sql",
+            "root_path": "/path/to/aa",
+        },
+        "model.with_no_constraints": {
+            "patch_path": "project://bb/with_no_constraints.yml",
+            "path": "aa/bb/with_no_constraints.sql",
+            "root_path": "/path/to/aa",
+            "config": {"materialized": "table"},
+        },
+        "model.with_empty_constraints": {
+            "patch_path": "project://bb/with_empty_constraints.yml",
+            "path": "aa/bb/with_empty_constraints.sql",
+            "root_path": "/path/to/aa",
+            "config": {"materialized": "table"},
+            "constraints": [],
+        },
+        "model.with_constraints": {
+            "patch_path": "project://bb/with_constraints.yml",
+            "path": "aa/bb/with_constraints.sql",
+            "root_path": "/path/to/aa",
+            "config": {"materialized": "table"},
+            "constraints": [
+                {"type": "primary_key", "columns": ["col_a", "col_b"]},
+                {"type": "foreign_key", "columns": ["col_a", "col_b"]},
+                {"type": "check", "columns": ["col_a", "col_b"]},
+                {"type": "not_null", "columns": ["col_a", "col_b"]},
+                {"type": "unique", "columns": ["col_a", "col_b"]},
+                {"type": "custom"},
+            ],
+        },
+        "model.with_constraints_no_columns": {
+            "patch_path": "project://bb/with_constraints_no_columns.yml",
+            "path": "aa/bb/with_constraints_no_columns.sql",
+            "root_path": "/path/to/aa",
+            "config": {"materialized": "table"},
+            "constraints": [{"type": "primary_key"}],
+        },
+        "model.with_constraints_no_match": {
+            "patch_path": "project://bb/with_constraints_no_match.yml",
+            "path": "aa/bb/with_constraints_no_match.sql",
+            "root_path": "/path/to/aa",
+            "config": {"materialized": "table"},
+            "constraints": [{"type": "foreign_key", "columns": ["col_a", "col_b"]}],
+        },
+        "snapshot.some_snapshot": {
+            "name": "some_snapshot",
+            "patch_path": "project://bb/some_snapshot.yml",
+            "path": "aa/bb/some_snapshot.sql",
+            "root_path": "/path/to/aa",
+            "config": {
+                "materialized": "snapshot",
+            },
         },
     },
     "sources": {
@@ -302,21 +402,21 @@ MANIFEST = {
         },
         "macro.with_argument_description": {
             "path": "macros/aa/with_argument_description.sql",
-            "arguments": {
-                "test1": {"name": "test1", "description": "test"},
-                "test2": {"name": "test2", "description": "test"},
-            },
+            "arguments": [
+                {"name": "test1", "description": "test"},
+                {"name": "test2", "description": "test"},
+            ],
         },
         "macro.with_some_argument_description": {
             "path": "macros/aa/with_some_argument_description.sql",
-            "arguments": {
-                "test1": {"name": "test1", "description": "test"},
-                "test2": {"name": "test2"},
-            },
+            "arguments": [
+                {"name": "test1", "description": "test"},
+                {"name": "test2"},
+            ],
         },
         "macro.without_arguments_description": {
             "path": "macros/aa/without_arguments_description.sql",
-            "arguments": {"test1": {"name": "test1"}, "test2": {"name": "test2"}},
+            "arguments": [{"name": "test1"}, {"name": "test2"}],
         },
     },
     "child_map": {
@@ -377,13 +477,15 @@ CATALOG = {
             "columns": {
                 "is_boolean": {"type": "boolean", "name": "is_boolean"},
                 "COL2": {"type": "TEXT", "name": "COL2"},
+                "IS_ALSO_BOOLEAN": {"type": "BOOLEAN", "name": "IS_ALSO_BOOLEAN"},
             },
         },
         "model.test.with_boolean_column_without_prefix": {
             "metadata": {},
             "columns": {
                 "COL1": {"type": "boolean", "name": "COL1"},
-                "COL2": {"type": "TEXT", "name": "COL2"},
+                "COL2": {"type": "BOOLEAN", "name": "COL2"},
+                "COL3": {"type": "TEXT", "name": "COL3"},
             },
         },
         "model.test.without_boolean_column_with_prefix": {
@@ -464,3 +566,9 @@ def temp_git_dir(tmpdir):
     git_dir = tmpdir.join("gits")
     cmd_output("git", "init", "--", str(git_dir))
     yield git_dir
+
+
+@pytest.fixture(scope="module")
+def pre_commit_hooks_yaml_dict():
+    with open(".pre-commit-hooks.yaml") as f:
+        yield yaml.safe_load(f)

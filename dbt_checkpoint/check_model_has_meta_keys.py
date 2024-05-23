@@ -7,6 +7,7 @@ from dbt_checkpoint.tracking import dbtCheckpointTracking
 from dbt_checkpoint.utils import (
     JsonOpenError,
     add_default_args,
+    add_meta_keys_args,
     get_dbt_manifest,
     get_filenames,
     get_model_schemas,
@@ -32,13 +33,14 @@ def has_meta_key(
     manifest: Dict[str, Any],
     meta_keys: Sequence[str],
     allow_extra_keys: bool,
+    include_disabled: bool = False,
 ) -> int:
     status_code = 0
     ymls = get_filenames(paths, [".yml", ".yaml"])
-    sqls = get_model_sqls(paths, manifest)
+    sqls = get_model_sqls(paths, manifest, include_disabled)
     filenames = set(sqls.keys())
     # get manifest nodes that pre-commit found as changed
-    models = get_models(manifest, filenames)
+    models = get_models(manifest, filenames, include_disabled=include_disabled)
     # if user added schema but did not rerun the model
     schemas = get_model_schemas(list(ymls.values()), filenames)
     # convert to sets
@@ -69,21 +71,7 @@ def has_meta_key(
 def main(argv: Optional[Sequence[str]] = None) -> int:
     parser = argparse.ArgumentParser()
     add_default_args(parser)
-
-    parser.add_argument(
-        "--meta-keys",
-        nargs="+",
-        required=True,
-        help="List of required key in meta part of model.",
-    )
-
-    parser.add_argument(
-        "--allow-extra-keys",
-        action="store_true",
-        required=False,
-        help="Whether extra keys are allowed.",
-    )
-
+    add_meta_keys_args(parser)
     args = parser.parse_args(argv)
 
     try:
@@ -98,6 +86,7 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
         manifest=manifest,
         meta_keys=args.meta_keys,
         allow_extra_keys=args.allow_extra_keys,
+        include_disabled=args.include_disabled,
     )
     end_time = time.time()
     script_args = vars(args)
