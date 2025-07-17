@@ -34,6 +34,7 @@ def check_model_columns(
     catalog: Dict[str, Any],
     exclude_pattern: str,
     include_disabled: bool = False,
+    only_missing_in_model: bool = False,
 ) -> int:
     paths = get_missing_file_paths(
         paths, manifest, extensions=[".sql"], exclude_pattern=exclude_pattern
@@ -58,7 +59,7 @@ def check_model_columns(
             schema_path = model.node.get("patch_path", "schema")  # pragma: no mutate
             if not schema_path:
                 schema_path = "any .yml file"
-            if model_only:
+            if model_only and not only_missing_in_model:
                 status_code = 1
                 print_cols = ["- name: %s" % yellow(col) for col in model_only if col]
                 print(
@@ -93,6 +94,11 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
     parser = argparse.ArgumentParser()
     add_default_args(parser)
     add_catalog_args(parser)
+    parser.add_argument(
+        "--only-missing-in-model",
+        action="store_true",
+        help="Only test that columns in database are present in model (ignore columns in model not in database)",
+    )
 
     args = parser.parse_args(argv)
 
@@ -115,6 +121,7 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
         catalog=catalog,
         exclude_pattern=args.exclude,
         include_disabled=args.include_disabled,
+        only_missing_in_model=args.only_missing_in_model,
     )
     end_time = time.time()
     script_args = vars(args)
@@ -129,6 +136,7 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
             "status": status_code,
             "execution_time": end_time - start_time,
             "is_pytest": script_args.get("is_test"),
+            "only_missing_in_model": args.only_missing_in_model,
         },
     )
 
