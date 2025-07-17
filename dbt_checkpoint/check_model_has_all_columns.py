@@ -35,9 +35,14 @@ def check_model_columns(
     exclude_pattern: str,
     include_disabled: bool = False,
     only_missing_in_model: bool = False,
+    only_changed_sql: bool = False,  # New parameter
 ) -> int:
     paths = get_missing_file_paths(
-        paths, manifest, extensions=[".sql"], exclude_pattern=exclude_pattern
+        paths,
+        manifest,
+        extensions=[".sql"],
+        exclude_pattern=exclude_pattern,
+        only_sql=only_changed_sql  # Pass new parameter
     )
 
     status_code = 0
@@ -99,6 +104,11 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
         action="store_true",
         help="Only test that columns in database are present in model (ignore columns in model not in database)",
     )
+    parser.add_argument(
+        "--only-changed-sql",
+        action="store_true",
+        help="Only test models with changed .sql files (ignore YAML changes)",
+    )
 
     args = parser.parse_args(argv)
 
@@ -122,6 +132,7 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
         exclude_pattern=args.exclude,
         include_disabled=args.include_disabled,
         only_missing_in_model=args.only_missing_in_model,
+        only_changed_sql=args.only_changed_sql,  # Pass new flag
     )
     end_time = time.time()
     script_args = vars(args)

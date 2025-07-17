@@ -18,6 +18,9 @@ TESTS = (
     (["aa/bb/catalog_cols.sql", "--is_test", "--only-missing-in-model"], True, True, True, 0),
     (["aa/bb/only_model_cols.sql", "--is_test", "--only-missing-in-model"], True, True, True, 0),  # Model has extra columns but we don't care in this mode
     (["aa/bb/only_catalog_cols.sql", "--is_test", "--only-missing-in-model"], True, True, True, 1),  # Catalog has columns not in model
+    # New tests for --only-changed-sql
+    (["aa/bb/schema.yml", "--is_test", "--only-changed-sql"], True, True, True, 0),  # YAML change should be ignored
+    (["aa/bb/only_model_cols.sql", "--is_test", "--only-changed-sql"], True, True, True, 1),  # SQL change should be processed
 )
 
 

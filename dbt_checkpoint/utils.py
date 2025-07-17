@@ -753,10 +753,12 @@ def get_missing_file_paths(
     include_ephemeral: bool = False,
     extensions: Sequence[str] = [".sql", ".yml", ".yaml"],
     exclude_pattern: str = "",
+    only_sql: bool = False,  # New parameter to skip YAML expansion
 ) -> Set[str]:
     nodes = manifest.get("nodes", {})
     paths_with_missing = set(paths)
-    if nodes:
+    # Only expand YAML/SQL relationships if not in only_sql mode
+    if nodes and not only_sql:
         for path in paths:
             suffix = Path(path).suffix.lower()
             if suffix == ".sql" and (".yml" in extensions or ".yaml" in extensions):
