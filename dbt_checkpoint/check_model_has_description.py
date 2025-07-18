@@ -22,9 +22,14 @@ def has_description(
     manifest: Dict[str, Any],
     exclude_pattern: str,
     include_disabled: bool = False,
+    only_changed_sql: bool = False,
 ) -> Dict[str, Any]:
     paths = get_missing_file_paths(  # type: ignore
-        paths, manifest, exclude_pattern=exclude_pattern
+        paths,
+        manifest,
+        extensions=[".sql"],
+        exclude_pattern=exclude_pattern,
+        only_sql=only_changed_sql,
     )
 
     status_code = 0
@@ -56,6 +61,11 @@ def has_description(
 def main(argv: Optional[Sequence[str]] = None) -> int:
     parser = argparse.ArgumentParser()
     add_default_args(parser)
+    parser.add_argument(
+        "--only-changed-sql",
+        action="store_true",
+        help="Only test models with changed .sql files (ignore YAML changes)",
+    )
 
     args = parser.parse_args(argv)
 
@@ -71,6 +81,7 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
         manifest=manifest,
         exclude_pattern=args.exclude,
         include_disabled=args.include_disabled,
+        only_changed_sql=args.only_changed_sql,
     )
     end_time = time.time()
     script_args = vars(args)
@@ -85,6 +96,7 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
             "status": hook_properties.get("status_code"),
             "execution_time": end_time - start_time,
             "is_pytest": script_args.get("is_test"),
+            "only_changed_sql": args.only_changed_sql,
         },
     )
 

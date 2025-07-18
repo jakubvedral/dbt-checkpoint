@@ -24,9 +24,14 @@ def check_test_cnt(
     test_cnt: int,
     exclude_pattern: str,
     include_disabled: bool = False,
+    only_changed_sql: bool = False,
 ) -> int:
     paths = get_missing_file_paths(
-        paths, manifest, extensions=[".sql"], exclude_pattern=exclude_pattern
+        paths,
+        manifest,
+        extensions=[".sql"],
+        exclude_pattern=exclude_pattern,
+        only_sql=only_changed_sql,
     )
 
     status_code = 0
@@ -79,6 +84,12 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
         help="Minimum number of tests required.",
     )
 
+    parser.add_argument(
+        "--only-changed-sql",
+        action="store_true",
+        help="Only test models with changed .sql files (ignore YAML changes)",
+    )
+
     args = parser.parse_args(argv)
 
     try:
@@ -95,6 +106,7 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
         test_cnt=args.test_cnt,
         exclude_pattern=args.exclude,
         include_disabled=args.include_disabled,
+        only_changed_sql=args.only_changed_sql,
     )
     end_time = time.time()
     script_args = vars(args)
@@ -109,6 +121,7 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
             "status": status_code,
             "execution_time": end_time - start_time,
             "is_pytest": script_args.get("is_test"),
+            "only_changed_sql": args.only_changed_sql,
         },
     )
 

@@ -102,3 +102,66 @@ def test_check_model_has_tests_by_group_error(
     input_schema.extend(input_args)
     with pytest.raises(SystemExit):
         main(input_schema)
+
+
+# New tests for --only-changed-sql functionality
+ONLY_CHANGED_SQL_TESTS = (
+    (
+        ["aa/bb/with_test1.sql", "aa/bb/with_test3.sql", "--is_test"],
+        ["--tests", "unique", "unique_where", "--test-cnt", "1", "--only-changed-sql"],
+        True,
+        True,
+        0,
+    ),
+    (
+        ["aa/bb/with_test1.sql", "aa/bb/with_test3.sql", "--is_test"],
+        ["--tests", "unique", "unique_where", "--test-cnt", "2", "--only-changed-sql"],
+        True,
+        True,
+        1,
+    ),
+    (
+        ["aa/bb/with_test1.sql", "--is_test"],
+        ["--tests", "unique", "unique_where", "--test-cnt", "2", "--only-changed-sql"],
+        True,
+        True,
+        1,
+    ),
+    (
+        ["aa/bb/with_test3.sql", "--is_test"],
+        ["--tests", "unique", "unique_where", "--test-cnt", "2", "--only-changed-sql"],
+        True,
+        True,
+        0,
+    ),
+)
+
+
+@pytest.mark.parametrize(
+    (
+        "input_schema",
+        "input_args",
+        "valid_manifest",
+        "valid_config",
+        "expected_status_code",
+    ),
+    ONLY_CHANGED_SQL_TESTS,
+)
+def test_check_model_has_tests_by_group_only_changed_sql(
+    input_schema,
+    input_args,
+    valid_manifest,
+    valid_config,
+    expected_status_code,
+    manifest_path_str,
+    config_path_str,
+):
+    if valid_manifest:
+        input_args.extend(["--manifest", manifest_path_str])
+
+    if valid_config:
+        input_args.extend(["--config", config_path_str])
+
+    input_schema.extend(input_args)
+    status_code = main(input_schema)
+    assert status_code == expected_status_code
